@@ -4,11 +4,15 @@
 # Contributors: http://linuxgsm.com/contrib
 # Website: https://linuxgsm.com
 # Description: Handles updating of Minecraft Bedrock servers.
+#fix for build info retrieving
+#thanks to Clemens Mol https://github.com/clemensmol 
+#https://github.com/GameServerManagers/LinuxGSM/pull/3521
 
 functionselfname="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"
-
+#random number for userAgent
+RandNum=$((1 + RANDOM % 5000))
 fn_update_minecraft_dl(){
-        latestmcbuildurl=$(curl -Ls  'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36' "https://www.minecraft.net/en-us/download/server/bedrock/" | grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*zip')
+        latestmcbuildurl=$(curl -H "Accept-Encoding: identity" -H "Accept-Language: en" -Ls -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RandNum.212 Safari/537.36" "https://www.minecraft.net/en-us/download/server/bedrock/" | grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*zip')
         fn_fetch_file "${latestmcbuildurl}" "" "" "" "${tmpdir}" "bedrock_server.${remotebuild}.zip"
         echo -e "Extracting to ${serverfiles}...\c"
         if [ "${firstcommandname}" == "INSTALL" ]; then
@@ -79,7 +83,7 @@ fn_update_minecraft_localbuild(){
 
 fn_update_minecraft_remotebuild(){
         # Gets remote build info.
-        remotebuild=$(curl -Ls  'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36' "https://www.minecraft.net/en-us/download/server/bedrock/" | grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*' | sed 's/.*\///' | grep -Eo "[.0-9]+[0-9]")
+        remotebuild=$(curl -H "Accept-Encoding: identity" -H "Accept-Language: en" -Ls -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RandNum.212 Safari/537.36" "https://www.minecraft.net/en-us/download/server/bedrock/" | grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*' | sed 's/.*\///' | grep -Eo "[.0-9]+[0-9]")
         if [ "${firstcommandname}" != "INSTALL" ]; then
                 fn_print_dots "Checking remote build: ${remotelocation}"
                 # Checks if remotebuild variable has been set.
